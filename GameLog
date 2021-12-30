@@ -1,0 +1,42 @@
+import java.io.FileWriter;
+import java.io.IOException;
+
+/**
+ * @author Samhitha Mupharaphu
+ * @version October 29 2021
+ */
+public class GameLog {
+    private int winningPlayer;
+    private int losingPlayerHits;
+    private int numTurns;
+    private String boardPatternOne;
+    private String boardPatternTwo;
+
+    public GameLog(int winningPlayer, int losingPlayerHits,
+                   int numTurns, String boardPatternOne, String boardPatternTwo) {
+        this.winningPlayer = winningPlayer;
+        this.losingPlayerHits = losingPlayerHits;
+        this.numTurns = numTurns;
+        this.boardPatternOne = boardPatternOne;
+        this.boardPatternTwo = boardPatternTwo;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        String losingPlayerPattern;
+        sb.append("Battleship Game Log:\nWinning Player: Player ").append(winningPlayer).append("\nHits: ");
+
+        if (winningPlayer == 1) {
+            losingPlayerPattern = "17 - " + losingPlayerHits;
+        } else {
+            losingPlayerPattern = losingPlayerHits + " - 17";
+        }
+
+        sb.append(losingPlayerPattern).append("\nNumber of Turns To Win: ").append(numTurns)
+                .append("\nPlayer 1 Board Pattern: ").append(boardPatternOne)
+                .append("\nPlayer 2 Board Pattern: ").append(boardPatternTwo).append("\n");
+
+        return sb.toString();
+    }
+}
