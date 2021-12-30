@@ -1,0 +1,215 @@
+import java.io.*;
+import java.util.Scanner;
+
+/**
+ * @author Samhitha Mupharaphu
+ * @version October 29 2021
+ */
+public class PlayGame {
+    char[][] shipPositionPlayerOne = new char[10][14];
+    char[][] shipPositionPlayerTwo = new char[10][14];
+    int playerOneShipCount = 17;
+    int playerTwoShipCount = 17;
+    int playerOneTurnCount;
+    int playerTwoTurnCount;
+
+    public char[][] loadFiles(File file) {
+        char[][] tempArray = new char[10][14];
+        try {
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+            String line;
+            int i = 0;
+            while ((line = br.readLine()) != null) {
+                tempArray[i] = line.toCharArray();
+                i++;
+            }
+            return tempArray;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public PlayGame() {
+        this.shipPositionPlayerOne = loadFiles(new File("ShipPositionsPlayerOne.txt"));
+        this.shipPositionPlayerTwo = loadFiles(new File("ShipPositionsPlayerTwo.txt"));
+    }
+
+    public void playerTurnOne(Scanner scan) {
+        int playerOneColumn;
+        int rowOneIndex;
+        char inputChar;
+        playerOneTurnCount = playerOneTurnCount + 1;
+
+        do {
+            System.out.println("Player 1 - Enter a row letter from A - J");
+            String playerOneRow = scan.next();
+            scan.nextLine();
+            char[] rowOne = playerOneRow.toCharArray();
+            inputChar = rowOne[0];
+            rowOneIndex = inputChar - 65;
+        } while (!(inputChar >= 'A' && inputChar <= 'J'));
+
+        do {
+            System.out.println("Player 1 - Enter a column number from 1 - 14");
+            playerOneColumn = scan.nextInt();
+            scan.nextLine();
+        } while (!(playerOneColumn >= 1 && playerOneColumn <= 14));
+
+        char ch = this.shipPositionPlayerTwo[rowOneIndex][playerOneColumn - 1];
+        System.out.println("Value:" + ch);
+
+        if (ch == 'H') {
+            playerTwoShipCount = playerTwoShipCount - 1;
+            this.shipPositionPlayerTwo[rowOneIndex][playerOneColumn - 1] = 'M';
+        }
+
+    }
+
+    public void playerTurnTwo(Scanner scan) {
+        int playerTwoColumn;
+        int rowTwoIndex;
+        char inputChar;
+        playerTwoTurnCount = playerTwoTurnCount + 1;
+
+        do {
+            System.out.println("Player 2 - Enter a row letter from A - J");
+            String playerTwoRow = scan.next();
+            scan.nextLine();
+            char[] rowTwo = playerTwoRow.toCharArray();
+            inputChar = rowTwo[0];
+            rowTwoIndex = inputChar - 65;
+        } while (!(inputChar >= 'A' && inputChar <= 'J'));
+
+        do {
+            System.out.println("Player 2 - Enter a column number from 1 - 14");
+            playerTwoColumn = scan.nextInt();
+            scan.nextLine();
+        } while (!(playerTwoColumn >= 1 && playerTwoColumn <= 14));
+
+        char ch = this.shipPositionPlayerOne[rowTwoIndex][playerTwoColumn - 1];
+        System.out.println("Value:" + ch);
+
+        if (ch == 'H') {
+            playerOneShipCount = playerOneShipCount - 1;
+            this.shipPositionPlayerOne[rowTwoIndex][playerTwoColumn - 1] = 'M';
+        }
+    }
+
+    public int checkWinnerOne() {
+        if (playerTwoShipCount == 0) {
+            System.out.println("Enemy fleet destroyed. Congratulations player 1!");
+            return 1;
+        }
+        return 0;
+    }
+
+    public int checkWinnerTwo() {
+        if (playerOneShipCount == 0) {
+            System.out.println("Enemy fleet destroyed. Congratulations player 2!");
+            return 2;
+        }
+        return 0;
+    }
+
+    public String boardPattern(int player) {
+        char[][] pattern = new char[10][14];
+        int topCounter = 0;
+        int bottomCounter = 0;
+        int middleCounter = 0;
+        String counterMessage;
+
+        if (player == 1) {
+            pattern = shipPositionPlayerOne;
+        } else if (player == 2) {
+            pattern = shipPositionPlayerTwo;
+        }
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 14; j++) {
+                if (pattern[i][j] == 'H') {
+                    topCounter++;
+                }
+            }
+        }
+
+        for (int i = 3; i < 7; i++) {
+            for (int j = 0; j < 14; j++) {
+                if (pattern[i][j] == 'H') {
+                    middleCounter++;
+                }
+            }
+        }
+
+        for (int i = 7; i < 10; i++) {
+            for (int j = 0; j < 14; j++) {
+                if (pattern[i][j] == 'H') {
+                    bottomCounter++;
+                }
+            }
+        }
+
+        if (topCounter >= 9) {
+            counterMessage = "Top Heavy";
+        } else if (middleCounter >= 9) {
+            counterMessage = "Middle Heavy";
+        } else if (bottomCounter >= 9) {
+            counterMessage = "Bottom Heavy";
+        } else {
+            counterMessage = "Scattered";
+        }
+        return counterMessage;
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        boolean playNotCompleted = true;
+        int winner = 0;
+        int losingPlayerHits = 0;
+        int winnerNumTurns = 0;
+        String playerOneBoardPattern = "";
+        String playerTwoBoardPattern = "";
+        Scanner scan = new Scanner(System.in);
+
+        PlayGame playGame = new PlayGame();
+
+        playerOneBoardPattern = playGame.boardPattern(1);
+        playerTwoBoardPattern = playGame.boardPattern(2);
+
+        System.out.println("Hello, Welcome to Battleship!");
+
+        while (playNotCompleted) {
+            playGame.playerTurnOne(scan);
+            winner = playGame.checkWinnerOne();
+            if (winner == 1) {
+                break;
+            }
+            playGame.playerTurnTwo(scan);
+            winner = playGame.checkWinnerTwo();
+            if (winner == 2) {
+                break;
+            }
+        }
+
+        if (winner == 1) {
+            losingPlayerHits = 17 - playGame.playerOneShipCount;
+            winnerNumTurns = playGame.playerOneTurnCount;
+        } else if (winner == 2) {
+            losingPlayerHits = 17 - playGame.playerTwoShipCount;
+            winnerNumTurns = playGame.playerTwoTurnCount;
+        }
+
+        GameLog gameLog = new GameLog(winner, losingPlayerHits, winnerNumTurns,
+                playerOneBoardPattern, playerTwoBoardPattern);
+
+        try {
+            FileWriter writer = new FileWriter("GameLog.txt");
+            writer.write(gameLog.toString());
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+}
